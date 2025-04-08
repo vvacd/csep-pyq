@@ -20,9 +20,10 @@ def run_query(query):
     rows = [dict(row) for row in rows_raw]
     return rows
 
-rows = run_query("SELECT word FROM `bigquery-public-data.samples.shakespeare` LIMIT 100")
+# Replace `your_project_id`, `your_dataset_id`, and `your_table_id` with your actual BigQuery table details.
+rows = run_query("SELECT * FROM `bq2409.c1_cse.csep_pyq1` LIMIT 100")
 
 # Print results.
-st.write("Some wise words from Shakespeare:")
+st.write("Data from your BigQuery table:")
 for row in rows:
-    st.write("✍️ 12" + row['word'])
+    st.write(row)  # Adjust this to display specific fields if needed
