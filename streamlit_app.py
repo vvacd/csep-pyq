@@ -1,29 +1,23 @@
-# streamlit_app.py
-
 import streamlit as st
-from google.oauth2 import service_account
 from google.cloud import bigquery
+from google.oauth2 import service_account
+import pandas as pd
 
-# Create API client.
-credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"]
-)
-client = bigquery.Client(credentials=credentials)
+# Convert secrets to a regular dict
+service_account_info = dict(st.secrets["gcp_service_account"])
 
-# Perform query.
-# Uses st.cache_data to only rerun when the query changes or after 10 min.
-@st.cache_data(ttl=600)
-def run_query(query):
-    query_job = client.query(query)
-    rows_raw = query_job.result()
-    # Convert to list of dicts. Required for st.cache_data to hash the return value.
-    rows = [dict(row) for row in rows_raw]
-    return rows
+# Create credentials
+credentials = service_account.Credentials.from_service_account_info(service_account_info)
 
-# Replace `your_project_id`, `your_dataset_id`, and `your_table_id` with your actual BigQuery table details.
-rows = run_query("SELECT * FROM `bq2409.c1_cse.csep_pyq1` LIMIT 100")
+# Set up BigQuery client
+client = bigquery.Client(credentials=credentials, project=credentials.project_id)
 
-# Print results.
-st.write("Data from your BigQuery table:")
-for row in rows:
-    st.write(row)  # Adjust this to display specific fields if needed
+# Query BigQuery
+query = "SELECT * FROM `bq2409.c1_cse.csep_pyq1` LIMIT 10"
+query_job = client.query(query)
+results = query_job.result()
+
+# Show results
+df = results.to_dataframe()
+st.write("BigQuery Results:")
+st.dataframe(df)
